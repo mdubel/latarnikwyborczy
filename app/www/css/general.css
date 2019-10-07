@@ -1,0 +1,56 @@
+.content-wrapper {
+  background-color: #ffffff;
+}
+
+.navbar {
+  background-color: #1d4f91 !important;
+}
+
+.main-header {
+  background-color: #ffffff;
+}
+
+.logo {
+  background-color: #ffffff !important;
+  border-right: 3px solid #7bbc48 !important;
+  color: #1d4f91 !important;
+}
+
+.box {
+  border-top: 3px solid #7bbc48
+}
+
+.dt-button {
+  background-image: none !important;
+}
+
+.content {
+  padding-top: 0 !important;
+}
+
+
+#sidebarCollapsed {
+background-color: #ffffff !important;
+  border-right: 3px solid #7bbc48 !important;
+}
+
+#sidebarCollapsed .col-sm-12 {
+color: black;
+padding-top: 10px !important;
+}
+
+
+
+#home-systeminfo div table thead tr th {
+font-size: 10px !important;
+font-weight: normal !important;
+white-space: nowrap !important;
+color: darkgray !important;
+padding-left: 10px !important;
+}
+
+
+#home-systeminfo td {
+font-size: 20px !important;
+white-space: nowrap !important;
+}

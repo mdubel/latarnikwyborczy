@@ -1,8 +1,4 @@
 import("shiny")
-import("DT")
-import("plotly")
-import("modules")
-import("shinydashboard")
 
 export("ui")
 export("init_server")
@@ -13,7 +9,7 @@ ui <- function(id) {
   ns <- NS(id)
   
   fluidRow(
-    
+
   )
 }
 
@@ -23,6 +19,5 @@ init_server <- function(id) {
 
 server <- function(input, output, session) {
   ns <- session$ns
-  
   
 }

@@ -1,18 +1,23 @@
-tagList(
-  tags$head(
-    tags$script(src = "js/vendor/selectize.min.js")
-  ),
-  semanticPage(
-    title = "App template",
-    div(class = "ui container",
-        style = "margin-top: 1em",
-        div(class = "ui grid",
-            div(class = "twelve wide column",
-                div(class = "ui segment",
-                    home$ui("home")
-                )
-            )
-        )
-    )
-  )
+library(shiny)
+library(shinyWidgets)
+library(dplyr)
+library(DT)
+library(plotly)
+library(shinydashboard)
+
+dashboardPage(title = "Demo",
+              dashboardHeader(
+                title = "Demo", #tags$img(src="logo.svg"),
+                titleWidth = 150
+              ),
+              dashboardSidebar(
+                width = 150,
+                sidebar$ui("sidebar")
+              ),
+              dashboardBody(
+                tags$head(
+                  tags$link(rel = "stylesheet", type = "text/css", href = "css/general.css")
+                ),
+                home$ui("home")
+              )
 )
