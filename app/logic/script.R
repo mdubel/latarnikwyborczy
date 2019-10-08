@@ -29,3 +29,26 @@ ggplotly(biplt)
 p <- plot_ly(ANSWERS_CLUST, x = ~PC1, y = ~PC2, z = ~PC3, color = ~GROUP,
              colors = c('#cfa61f', '#2b2929', '#ff231f', '#030e40', '#0bd00b')) %>% 
   add_markers()
+
+
+
+library(plotly)
+
+df <- read.csv("https://raw.githubusercontent.com/bcdunbar/datasets/master/iris.csv")
+
+p <- df %>%
+  plot_ly(type = 'parcoords',
+          color = ~species,
+          line = list(color = ~species),
+          dimensions = list(
+            list(range = c(2,4.5),
+                 label = 'Sepal Width', values = ~sepal_width),
+            list(range = c(4,8),
+                 label = 'Sepal Length', values = ~sepal_length),
+            list(range = c(0,2.5),
+                 label = 'Petal Width', values = ~petal_width),
+            list(range = c(1,7),
+                 label = 'Petal Length', values = ~petal_length)
+          )
+  )
+p
