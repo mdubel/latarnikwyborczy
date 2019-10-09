@@ -9,9 +9,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(knitr)
 library(dplyr)
+library(ggbiplot)
+library(plotly)
 ```
 
 # Visualising the political preferences
@@ -65,12 +67,12 @@ QUESTIONS <- list(
 
 ```
 
-I think you can more or less guess most of the answers given by each party, so you can compare it with the actual results now - but I strongly recommend to wait for more fancy solutions. I wrote down all the answers in simple csv file (manually, no fancy web-scraping this time) so now we can load them easily. To make my life easier in further computational methods I've coded the answers as follows:
+I think you can more or less guess most of the answers given by each party. I wrote down all the answers in simple csv file (manually, no fancy web-scraping this time) so now we can load them easily. To make my life easier in further computational methods I've coded the answers as follows:
 1  - I agree
 0  - I have no opinion
 -1 - I disagree
 ```{r}
-ANSWERS <- read.csv2("./app/data/answers.csv")
+ANSWERS <- read.csv2("./app/data/answers.csv", stringsAsFactors = FALSE)
 ```
 ```{r echo = FALSE}
 names(ANSWERS)[1] <- "Party"
@@ -80,53 +82,127 @@ kable(ANSWERS[,c(1,12:21)])
 ```
 
 
-## Radar charts
+## Extracting principal components
 
-Goal of the first solution is to present all the questions and answers on the single plot. The so called radar (or web) chart seems perfect for the job.
+Observing political views in 20 dimensional space is not very convenient for human perception. There are nice visualisation solutions for this kind of problems like radar (spider) charts or parallel coordinates plot, but still it seems like getting too much into details. The answers to the detailed questions are directly a result of parties general attitude: conservative or liberal, pro/anti European integration, more social or free market economy approach and so on. 
+
+The aim of this part is to identify those general directions that diversifies political parties and visualise them. For the the Principal Component Analysis will be used.
+Let us look at the answers again: questions 2, 7 and 20 have all same (all positive) answers. So the matters of moving headquater of central offices outside the Warsaw, teaching more practical skills at schools and maintaining sanctions on Russia are a common ground for all parties. Nice that they agree (or they know that it is how the voters see it) on something. We will need to focus on other questions to spot the differences between parties.
+
+To perform PCA analysis we will use `prcomp` function from base R:
+```{r}
+# remove the Party name and the not useful questions
+ANSWERS_PCA <- ANSWERS[,-c(1, 3, 8, 21)]
+# prepare the PCA model
+model_pca <- prcomp(ANSWERS_PCA)
+# check the results
+summary(model_pca)
+```
+
+The key decision in PCA analysis is how many components to use. The rule of thumb is: as many as the increase of variance explained is significant (it gets smaller with each component i.e. first component is this that explains the most of the variance and so on). Usually two or three is enough, as the main reason to perform this operation is to reduce the number of variables. Here we can see that two of components explain over 82% of the variance, which would be enough. But hey, it will be much more fun to present the political views in the 3D space! So lets add the third one as well.
+
+And now comes the crucial part: understanding what the components are and naming them. This is some kind of art in this whole process thus the answers might depend on the analytic who is performing the PCA. The process is based on the magnitude and the direction of each question influence on the component. The results are as follows:
+```{r}
+model_pca$rotation[,1:3] %>% round(., 4)
+```
+
+Some pairs of questions have exactly same results for all components. Coincidence? I think not! They just have the same combination of answers, which is a result of having only five observations in the dataset. Well, it is easier to think which party definitely do not deserve your vote and which do not deserve it a little bit less.
+
+There is a helper plot provided by the package `ggbiplot` that helps to understand the questions influence. Let us see the visualisations for 1st+2nd components and 1st+3rd:
+```{r}
+ggplotly(ggbiplot(model_pca, labels = ANSWERS$Party, choices = c(1,2)))
+ggplotly(ggbiplot(model_pca, labels = ANSWERS$Party, choices = c(1,3)))
+```
+
+# 1st Component
+Let us analyze the components one by one, starting from the first one:
+The biggest positive influence had questions 8, 11, 14, 16. The negative have 13 and 17, so: 
+
++ Q8: cultural policy should strenghten national identity
++ Q11: Christian values should be the basis of the state's social policy
++ Q14: Coal should remain the primary source of energy in Poland
++ Q16: The development and strengthening of Territorial Defense Forces should be continued
+
+- Q13: Same-sex people should be able to enter into a legal partnership
+- Q17: Poland should accept a larger number of economic immigrants from other countries
+
+Looks like a classic left-wing/right-wing classificator. Strong result on first component shows the right-wing views, including promoting traditional national and religious values, not caring about the environment, supporting strong military position based on trained citizens and refusing rights for homosexual couples and emigrants. We could call it altogether: *conservatism*
+
+# 2nd Component
+How about the second one? There is a small positive insight from questions 10, 15, 19, but here we should rather focus on the strong negatives: 1, 3, 5, and especially 6 and 18. Let us start from the strongest ones:
+
+- Q6: A patient in a public healthcare system facility should be able to pay for a higher standard of medical services
+- Q18: The European Union should have less influence on Polish internal policy
+
+- Q1: The scope of competence of local self-governments should be gradually expanded
+- Q3: The independence of the judiciary from parliament and government should be strengthened
+- Q5: The income tax-free amount should be increased significantly
+
++ Q10: Information media should remain under the Polish financial control
++ Q15: Poland should accelerate the construction of the nuclear power plant
++ Q19: Poland should support the deepening of European integration in the field of foreign and defense policy
+
+Here the grouping is not so simple, but we must try. Negative impact of questions 5 and 6 implicate the tendency for equalizing the wealth among citizens. Questions 1 and 3 shows that groups with high result in 2nd component like keeping all the political power on the central, goverment level, without taking into account the judiciary. It seems like the common ground for those two aspects is taking the decisions and responsibilities from the citizens to the state, both in legal and economic issues. Thus it looks like the *socialism*.
+
+# 3rd component
+Usually the further we go in the PCA the harder it gets. Let see. Strong positive impact of question 19 and some for 8 and 11; negatives of 4, 9, 12, 13, 15, 17. So:
+
++ Q19: Poland should support the deepening of European integration in the field of foreign and defense policy
++ Q8: cultural policy should strenghten national identity
++ Q11: Christian values should be the basis of the state's social policy
+
+- Q4: Retirement age should be increased
+- Q9: Public funds for learning should be focused on supporting the best universities in the country
+- Q12: The abortion law should be relaxed
+- Q13: Same-sex people should be able to enter into a legal partnership
+- Q14: Coal should remain the primary source of energy in Poland
+- Q15: Poland should accelerate the construction of the nuclear power plant
+- Q16: The development and strengthening of Territorial Defense Forces should be continued 
+- Q17: Poland should accept a larger number of economic immigrants from other countries
+
+The views here are quite complicated: they are pro-european and environmentally friendly, yet still traditional in the matters of national identity, christian values, abortion law, same-sex couples and immigrants. This component does not want to focus only on the best universities, but rather increase general standard. I will go with *eurotraditionalism*. Complicated phrase; party will collect points here for both being conservative but open for European Union and green initiatives. Lacking in one of the views will strongly reduce the score here.
+
+# Visualisation
+Once we have all of the dimensions specified lets calculate the components values for each party and locate them on the plot!
+```{r}
+ANSWERS$PC1 <- apply(ANSWERS_PCA, 1, function(x) {sum(x * model_pca$rotation[,1])})
+ANSWERS$PC2 <- apply(ANSWERS_PCA, 1, function(x) {sum(x * model_pca$rotation[,2])})
+ANSWERS$PC3 <- apply(ANSWERS_PCA, 1, function(x) {sum(x * model_pca$rotation[,3])})
+plot_ly(ANSWERS, x = ~PC1, y = ~PC2, z = ~PC3, color = ~Party,
+        colors = c('#cfa61f', '#2b2929', '#ff231f', '#030e40', '#0bd00b')) %>% add_markers() %>% 
+  layout(scene = list(xaxis = list(title = "conservatism"), yaxis = list(title = "socialism"), zaxis = list(title = "eurotraditionalism")))
+```
+
+We can analyze now party by party. It of course requires some inside knowledge of polish political scene.
+
+*Lewica*: as the only left-wing here it has the lowest score on conservative scale, e.g. it is the only party which demands relaxing the abortion law. The socialism result is positive, but not great: they kinda cannot decide whether they're truly post-communists or modern free-market supporters (it can be discussed whether communism was truly about equality, but it might take too much space...). The eurotraditionalism is in the middle: they are fans of EU and pro-ecology, but for sure they're not traditional folks.
+
+*PSL*: in the middle on conservative scale - they are traditional rural party, but they used to be in a goverment coalition with social-democrats (post-communist party, now the part of the 'Lewica') - so they kinda cannot decide. They are known for being very strong in the local goverments - thus they will support them and that is why their socialistic result is low. They reach the hightest score on eurotraditionalist, which is exactly presenting their dualism.
+
+*Konfederacja*: truly right-wing party - both in the ethical views and economic issues, known supporters of the free-market and removing personal income tax. Low score in the third component is mainly caused by their deep eurosceptism - they would call the Polexit if they could.
+
+*KO*: once more center, now they turn a little bit left as the right side is strongly occupied by PiS. This tendency was even strengthen when Civic Platform form coalition with party 'Modern' - left-wing and free-market supporters. They're for sure an Euro enthusiast with their former leader Donald Tusk as big player in Europe, but for sure they do not aim in traditionalistic electorate - thus component three is positive, yet small.
+
+*PiS*: conservative in their opinions; they have strong relations and support by the Catholic Church in Poland. They've intoduced a lot of social programs in the last 4 years as well as many actions to reduce the power of local goverments and judiciary - thus the highest result in socialism. For sure traditionalistic, not a big supporters of EU, but never openly against this institution.
+
+
+## Adding vox populi
+
+I wonder how the real voters are located on the plot. Are they more in the center and need to look for parties to the edges? Or whether the politics tactic is to be in the center to gather more electorate? 
+
+To solve this I've asked my family members to fill the questionaire and I will map their results to the parties. You must know that we present all options, thus it might be interesting. Lets call them all FM (as Family Member) to keep some GDPR rules:
 
 ```{r}
-library(plotly)
+ANSWERS[6,] <- list("FM1", 1, -1, 1, -1, 0, 1, -1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, -1)
+ANSWERS[7,] <- list("FM2", 1, -1, 1, -1, 0, 1, -1, 0, -1, 1, 1, -1, -1, 0, 0, 0, -1, 1, -1, 0)
+ANSWERS[8,] <- list("FM3", -1, -1, 1, -1, 1, -1, 1, 0, 1, 0, -1, -1, 1, -1, -1, 1, 0, -1, 1, 0)
+ANSWERS[9,] <- list("FM4", 1, -1, 1, -1, -1, 1, 1, -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1, 0)
+ANSWERS[10,] <- list("FM5", 1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, -1, 0, -1, 1, -1, 1, 1)
+ANSWERS[11,] <- list("FM6", 1, -1, -1, -1, 1, 1, 1, 1, 1, -1, 1, -1, -1, -1, 1, 0, -1, 1, -1, -1)
+ANSWERS[12,] <- list("FM7", 1, 1,	1, 1, -1,	-1,	1, -1, -1, -1, 1, -1,	1, -1, 1, -1,	1, -1, 1, 1)
 
-df <- read.csv("https://raw.githubusercontent.com/bcdunbar/datasets/master/iris.csv")
-
-p <- df %>%
-  plot_ly(type = 'parcoords',
-          color = ~species,
-          line = list(color = ~species),
-          dimensions = list(
-            list(range = c(2,4.5),
-                 label = 'Sepal Width', values = ~sepal_width),
-            list(range = c(4,8),
-                 label = 'Sepal Length', values = ~sepal_length),
-            list(range = c(0,2.5),
-                 label = 'Petal Width', values = ~petal_width),
-            list(range = c(1,7),
-                 label = 'Petal Length', values = ~petal_length)
-            )
-          )
-p
+plot_ly(ANSWERS, x = ~PC1, y = ~PC2, z = ~PC3, color = ~Party,
+        colors = c(rep('#0077b5', 7), '#cfa61f', '#2b2929', '#ff231f', '#030e40', '#0bd00b')) %>% add_markers() %>% 
+  layout(scene = list(xaxis = list(title = "conservatism"), yaxis = list(title = "socialism"), zaxis = list(title = "eurotraditionalism")))
 ```
 
-
-
-
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
