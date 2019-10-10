@@ -1,7 +1,7 @@
 ---
-title: "latarnikwyborczy"
+title: "Mapping Political Views in 3D"
 author: "Marcin Dubel"
-date: "7 października 2019"
+date: "October 10 2019"
 output: html_document
 ---
 
@@ -18,26 +18,26 @@ library(plotly)
 
 # Visualising the political preferences
 
-## Questionaire
+## Questionnaire
 
 Brace yourself! Polish Parliamentary Election is coming October 13!
 
-In Poland, as I guess everywhere, politics are promising a lot and evade direct answers. Thus I really like the tools like <http://latarnikwyborczy.pl>, widely used by polish voters before the elections (unfortunately there is no English version). It allows the citizens to compare their views on most discussed issues with the answers given by political parties - so gives you the clear overview of politics opinions.
+In Poland, as I guess everywhere, the politics are promising a lot and evade direct answers. Thus I really like the tools like <http://latarnikwyborczy.pl>, widely used by the polish voters before the elections. It allows the citizens to compare their views on most discussed issues with the political parties answers - so provides you with the clear overview of their opinions.
 
-This year questionnarie consist of 20 questions. They're not divided into groups. There are basically three answers to each question: "I agree", "I have no opinion", "I disagree". The final result is percentage coverage of your's and political parties' answers. Currently we have five of them. Of course this not determine your vote, as there might be other reasons to back or do not support some groups, but this gives a nice general view.
+This year the questionnaire consist of 20 questions, not splitted into groups. There are basically three answers to each question: "I agree", "I have no opinion", "I disagree". The final result is a percentage coverage of yours and political parties' answers. Of course there might be other reasons to back or do not support some groups - this result does not determine your vote, but gives a nice general view.
 
-As my job and hobby is to visualise data I feel that there might be a better way to present results then single percent. Let me show you in this short report two options that come to my mind.
+As my job and hobby is to visualise the data I feel that there might be a better way to present results then a single percent. Let me show you one option that came to my mind in this short report.
 
 ## Parties and questions
 
-I guess it is high time to introduce our players!
-(in brackets the short names - made from polish names - used in plots legends; alphabetic order by short names)
+I guess it is high time to introduce our players! Currently we have five parties running in the election.
+(in brackets the short names - made from polish names - also used in plots legends; alphabetic order by short names)
 
-- Civic Coalition: former ruling party Civic Platform + Modern (Nowoczesna), current President of the European Council was it's leader before nomination (KO);
-- Confederation Freedom and Independence: righ-wing and eurosceptic alliance, according to the polls they're balancing on election 5% threshold (Konfederacja);
-- The Left: left-wing alliance formed by parties SLD + Wiosna + Razem (Lewica);
-- Polish Coalition: Polish People's Party (traditional rural party) + former rock musician Paweł Kukiz - interesting mix (PSL);
-- Law and Justice: current ruling party, polls give it most chances to win again (PiS);
+- **Civic Coalition**: former ruling party Civic Platform + Modern (Nowoczesna), current President of the European Council was its leader before nomination (KO);
+- **Confederation Freedom and Independence**: right-wing and eurosceptic alliance, according to the polls they're balancing on election 5% threshold (Konfederacja);
+- **The Left**: left-wing alliance formed by parties SLD + Wiosna + Razem (Lewica);
+- **Polish Coalition**: Polish People's Party (traditional rural party) + former rock musician Paweł Kukiz - interesting mix (PSL);
+- **Law and Justice**: current ruling party, polls give them most chances to win again (PiS);
 
 And the list of questions in order of appearance:
 
@@ -49,7 +49,7 @@ QUESTIONS <- list(
   question04 = "Q4: Retirement age should be increased.",
   question05 = "Q5: The income tax-free amount should be increased significantly.",
   question06 = "Q6: A patient in a public healthcare system facility should be able to pay for a higher standard of medical services.",
-  question07 = "Q7: The scope of theoretical knowledge taught in schools should be limited in favor for the development of students' skills.",
+  question07 = "Q7: The scope of theoretical knowledge taught in schools should be limited in favour for the development of students' skills.",
   question08 = "Q8: The priority of the state's cultural policy should be to strengthen national identity.",
   question09 = "Q9: Public funds for learning should be focused on supporting the best universities in the country.",
   question10 = "Q10: Information media should remain under the Polish financial control.",
@@ -58,19 +58,19 @@ QUESTIONS <- list(
   question13 = "Q13: Same-sex people should be able to enter into a legal partnership.",
   question14 = "Q14: Coal should remain the primary source of energy in Poland.",
   question15 = "Q15: Poland should accelerate the construction of the nuclear power plant.",
-  question16 = "Q16: The development and strengthening of Territorial Defense Forces should be continued.",
+  question16 = "Q16: The development and strengthening of Territorial Defence Forces should be continued.",
   question17 = "Q17: Poland should accept a larger number of economic immigrants from other countries.",
   question18 = "Q18: The European Union should have less influence on Polish internal policy.",
-  question19 = "Q19: Poland should support the deepening of European integration in the field of foreign and defense policy.",
+  question19 = "Q19: Poland should support the deepening of European integration in the field of foreign and defence policy.",
   question20 = "Q20: Poland should strive to maintain international sanctions imposed on Russia after the aggression on Ukraine."
 )
 
 ```
 
-I think you can more or less guess most of the answers given by each party. I wrote down all the answers in simple csv file (manually, no fancy web-scraping this time) so now we can load them easily. To make my life easier in further computational methods I've coded the answers as follows:
-1  - I agree
-0  - I have no opinion
--1 - I disagree
+Probably you can guess some of the answers given by our players. I wrote down all the answers in simple csv file (manually, no fancy web-scraping this time) so now we can load them easily. To make my life easier in further computational methods I've coded the answers as follows:
+**1 : I agree**
+**0 : I have no opinion**
+**-1 : I disagree**
 ```{r}
 ANSWERS <- read.csv2("./app/data/answers.csv", stringsAsFactors = FALSE)
 ```
@@ -84,49 +84,49 @@ kable(ANSWERS[,c(1,12:21)])
 
 ## Extracting principal components
 
-Observing political views in 20 dimensional space is not very convenient for human perception. There are nice visualisation solutions for this kind of problems like radar (spider) charts or parallel coordinates plot, but still it seems like getting too much into details. The answers to the detailed questions are directly a result of parties general attitude: conservative or liberal, pro/anti European integration, more social or free market economy approach and so on. 
+Observing the political views in a 20 dimensional space is not very convenient for human perception. Although there are nice visualisation solutions for this kind of problem like the radar (spider) charts or parallel coordinates plot, but still 20 questions seems like getting too much into details. An answer to the specific question is directly a result of the parties general attitude: conservative or liberal, pro/anti European, more socialistic or free market economy approach and so on. 
 
-The aim of this part is to identify those general directions that diversifies political parties and visualise them. For the the Principal Component Analysis will be used.
-Let us look at the answers again: questions 2, 7 and 20 have all same (all positive) answers. So the matters of moving headquater of central offices outside the Warsaw, teaching more practical skills at schools and maintaining sanctions on Russia are a common ground for all parties. Nice that they agree (or they know that it is how the voters see it) on something. We will need to focus on other questions to spot the differences between parties.
+The aim of this part is to identify those general directions that diversifies political parties and visualise them. For this task the Principal Component Analysis will be used.
+Let us look at the answers again: questions 2, 7 and 20 have all same (positive) answers. So the matters of moving headquarter of central offices outside the Warsaw, teaching more practical skills at schools and maintaining sanctions on Russia are a common ground for all parties. Nice that they agree on something - or they know that those are the answers that voters would like. One way or another we will need to focus on other questions to spot the differences between the parties.
 
-To perform PCA analysis we will use `prcomp` function from base R:
+To perform PCA analysis we will use the `prcomp` function from base R:
 ```{r}
-# remove the Party name and the not useful questions
-ANSWERS_PCA <- ANSWERS[,-c(1, 3, 8, 21)]
+# remove the Party name and not useful questions
+ANSWERS_PCA <- ANSWERS[, -c(1, 3, 8, 21)]
 # prepare the PCA model
 model_pca <- prcomp(ANSWERS_PCA)
 # check the results
 summary(model_pca)
 ```
 
-The key decision in PCA analysis is how many components to use. The rule of thumb is: as many as the increase of variance explained is significant (it gets smaller with each component i.e. first component is this that explains the most of the variance and so on). Usually two or three is enough, as the main reason to perform this operation is to reduce the number of variables. Here we can see that two of components explain over 82% of the variance, which would be enough. But hey, it will be much more fun to present the political views in the 3D space! So lets add the third one as well.
+The key decision in PCA analysis is how many components to use. The rule of thumb is: as many as the increase of explained variance is still significant (it gets smaller with each component i.e. first component is this one that explains the most of the variance and so on). Usually two or three is enough, as the main goal of this operation is to reduce the number of variables. Here we can see that two of the components explain over 82% of the variance, which would be enough. But hey, it will be much more fun to present the political views in the 3D space! So let's add the third one as well.
 
-And now comes the crucial part: understanding what the components are and naming them. This is some kind of art in this whole process thus the answers might depend on the analytic who is performing the PCA. The process is based on the magnitude and the direction of each question influence on the component. The results are as follows:
+And now comes the crucial part: understanding what the components represents and labelling them. This is some kind of art in this whole process thus the results might depend on the PCA analyst. The process is based on the magnitude and the direction of each question (variable) influence on a component. For our case the results are as follows:
 ```{r}
 model_pca$rotation[,1:3] %>% round(., 4)
 ```
 
-Some pairs of questions have exactly same results for all components. Coincidence? I think not! They just have the same combination of answers, which is a result of having only five observations in the dataset. Well, it is easier to think which party definitely do not deserve your vote and which do not deserve it a little bit less.
+Please note that some pairs of questions have exactly the same results for all components. Coincidence? I think not! They just have the same combination of answers, which is a result of having only five observations in the dataset. Well, on the other hand it is easier in small group to think which party definitely do not deserve your vote and which do not deserve it a little bit less.
 
-There is a helper plot provided by the package `ggbiplot` that helps to understand the questions influence. Let us see the visualisations for 1st+2nd components and 1st+3rd:
+Fortunately there is a nice plot provided by the package `ggbiplot` that helps to understand the questions influence. Let us see the visualisations for 1st+2nd and 1st+3rd components:
 ```{r}
 ggplotly(ggbiplot(model_pca, labels = ANSWERS$Party, choices = c(1,2)))
 ggplotly(ggbiplot(model_pca, labels = ANSWERS$Party, choices = c(1,3)))
 ```
 
 # 1st Component
-Let us analyze the components one by one, starting from the first one:
-The biggest positive influence had questions 8, 11, 14, 16. The negative have 13 and 17, so: 
+Let us analyse the components one by one, starting from the first one:
+The biggest positive influence have questions 8, 11, 14, 16. The negatives are 13 and 17, so: 
 
-+ Q8: cultural policy should strenghten national identity
++ Q8: cultural policy should strengthen national identity
 + Q11: Christian values should be the basis of the state's social policy
 + Q14: Coal should remain the primary source of energy in Poland
-+ Q16: The development and strengthening of Territorial Defense Forces should be continued
++ Q16: The development and strengthening of Territorial Defence Forces should be continued
 
 - Q13: Same-sex people should be able to enter into a legal partnership
 - Q17: Poland should accept a larger number of economic immigrants from other countries
 
-Looks like a classic left-wing/right-wing classificator. Strong result on first component shows the right-wing views, including promoting traditional national and religious values, not caring about the environment, supporting strong military position based on trained citizens and refusing rights for homosexual couples and emigrants. We could call it altogether: *conservatism*
+Looks like an usual left-wing/right-wing classification. Strong result on first component shows the right-wing views, including promoting national and religious values, not caring about the environment, supporting strong military position based on trained citizens and refusing rights for homosexual couples and immigrants. We could call it altogether: *conservatism*
 
 # 2nd Component
 How about the second one? There is a small positive insight from questions 10, 15, 19, but here we should rather focus on the strong negatives: 1, 3, 5, and especially 6 and 18. Let us start from the strongest ones:
@@ -140,15 +140,15 @@ How about the second one? There is a small positive insight from questions 10, 1
 
 + Q10: Information media should remain under the Polish financial control
 + Q15: Poland should accelerate the construction of the nuclear power plant
-+ Q19: Poland should support the deepening of European integration in the field of foreign and defense policy
++ Q19: Poland should support the deepening of European integration in the field of foreign and defence policy
 
-Here the grouping is not so simple, but we must try. Negative impact of questions 5 and 6 implicate the tendency for equalizing the wealth among citizens. Questions 1 and 3 shows that groups with high result in 2nd component like keeping all the political power on the central, goverment level, without taking into account the judiciary. It seems like the common ground for those two aspects is taking the decisions and responsibilities from the citizens to the state, both in legal and economic issues. Thus it looks like the *socialism*.
+Here the grouping is not so simple, but we must try. Negative impact of questions 5 and 6 implicate the tendency for equalizing the wealth among citizens. Questions 1 and 3 shows that groups with high result in the  2nd component like keeping all the political power on the central, government level, without taking into account the judiciary. It seems like the common ground for those two aspects is taking back the decisions and responsibilities from the citizens to the state, both in legal and economic issues. Thus it looks like the *socialism*.
 
-# 3rd component
+# 3rd Component
 Usually the further we go in the PCA the harder it gets. Let see. Strong positive impact of question 19 and some for 8 and 11; negatives of 4, 9, 12, 13, 15, 17. So:
 
-+ Q19: Poland should support the deepening of European integration in the field of foreign and defense policy
-+ Q8: cultural policy should strenghten national identity
++ Q19: Poland should support the deepening of European integration in the field of foreign and defence policy
++ Q8: cultural policy should strengthen national identity
 + Q11: Christian values should be the basis of the state's social policy
 
 - Q4: Retirement age should be increased
@@ -157,10 +157,10 @@ Usually the further we go in the PCA the harder it gets. Let see. Strong positiv
 - Q13: Same-sex people should be able to enter into a legal partnership
 - Q14: Coal should remain the primary source of energy in Poland
 - Q15: Poland should accelerate the construction of the nuclear power plant
-- Q16: The development and strengthening of Territorial Defense Forces should be continued 
+- Q16: The development and strengthening of Territorial Defence Forces should be continued 
 - Q17: Poland should accept a larger number of economic immigrants from other countries
 
-The views here are quite complicated: they are pro-european and environmentally friendly, yet still traditional in the matters of national identity, christian values, abortion law, same-sex couples and immigrants. This component does not want to focus only on the best universities, but rather increase general standard. I will go with *eurotraditionalism*. Complicated phrase; party will collect points here for both being conservative but open for European Union and green initiatives. Lacking in one of the views will strongly reduce the score here.
+The views here are quite complicated: they are pro-european and environmentally friendly, yet still traditional in the matters of national identity, Christian values, abortion law, same-sex couples and immigrants. I will go with *eurotraditionalism*. Complicated phrase; party will collect points here for both being conservative but open for European Union and green initiatives. Lacking in one of the views will strongly reduce the score here.
 
 # Visualisation
 Once we have all of the dimensions specified lets calculate the components values for each party and locate them on the plot!
@@ -173,36 +173,49 @@ plot_ly(ANSWERS, x = ~PC1, y = ~PC2, z = ~PC3, color = ~Party,
   layout(scene = list(xaxis = list(title = "conservatism"), yaxis = list(title = "socialism"), zaxis = list(title = "eurotraditionalism")))
 ```
 
-We can analyze now party by party. It of course requires some inside knowledge of polish political scene.
+We can analyse now party by party. It of course requires some inside knowledge of polish political scene.
 
-*Lewica*: as the only left-wing here it has the lowest score on conservative scale, e.g. it is the only party which demands relaxing the abortion law. The socialism result is positive, but not great: they kinda cannot decide whether they're truly post-communists or modern free-market supporters (it can be discussed whether communism was truly about equality, but it might take too much space...). The eurotraditionalism is in the middle: they are fans of EU and pro-ecology, but for sure they're not traditional folks.
+**Lewica**: as the only left-wing here it has the lowest score on conservative scale, e.g. it is the only party which demands relaxing the abortion law. The socialism result is positive, but not great: they kind of cannot decide whether they're truly post-communists or modern free-market supporters (it can be discussed whether communism was truly about equality, but maybe some other time...). The eurotraditionalism is in the middle: they are fans of EU and pro-ecology, but for sure they're not traditional folks.
 
-*PSL*: in the middle on conservative scale - they are traditional rural party, but they used to be in a goverment coalition with social-democrats (post-communist party, now the part of the 'Lewica') - so they kinda cannot decide. They are known for being very strong in the local goverments - thus they will support them and that is why their socialistic result is low. They reach the hightest score on eurotraditionalist, which is exactly presenting their dualism.
+**PSL**: in the middle on conservative scale - they are traditional rural party, but they used to be in a goverment coalition with social-democrats (post-communist party, now the part of the 'Lewica') - so they kind of cannot decide. They are known for being very strong in the local governments - thus they will support them and that is why their socialistic result is low. They reach the highest score on eurotraditionalist, which is exactly presenting their dualism.
 
-*Konfederacja*: truly right-wing party - both in the ethical views and economic issues, known supporters of the free-market and removing personal income tax. Low score in the third component is mainly caused by their deep eurosceptism - they would call the Polexit if they could.
+**Konfederacja**: truly right-wing party - both in the ethical views and economic issues, known supporters of the free-market e.g. removing personal income tax. Low score in the third component is mainly caused by their deep eurosceptism - they would call the Polexit if they could.
 
-*KO*: once more center, now they turn a little bit left as the right side is strongly occupied by PiS. This tendency was even strengthen when Civic Platform form coalition with party 'Modern' - left-wing and free-market supporters. They're for sure an Euro enthusiast with their former leader Donald Tusk as big player in Europe, but for sure they do not aim in traditionalistic electorate - thus component three is positive, yet small.
+**KO**: once more centre, now they turn a little bit left as the right side is strongly occupied by PiS. This tendency was even strengthen when Civic Platform form coalition with party 'Modern' - left-wing and free-market supporters. They're for sure an Euro enthusiasts with their former leader Donald Tusk as a big player in Europe, but for sure they do not aim in traditionalistic electorate - thus component three is positive, yet small.
 
-*PiS*: conservative in their opinions; they have strong relations and support by the Catholic Church in Poland. They've intoduced a lot of social programs in the last 4 years as well as many actions to reduce the power of local goverments and judiciary - thus the highest result in socialism. For sure traditionalistic, not a big supporters of EU, but never openly against this institution.
+**PiS**: conservative in their opinions; they have strong relations and support by the Catholic Church in Poland. They've introduced a lot of social programs in the last 4 years as well as many actions to reduce the power of local governments and judiciary - thus the highest result in socialism. For sure traditionalistic, not a big supporters of EU, but never openly against this institution.
 
 
-## Adding vox populi
+## Adding real voters
 
-I wonder how the real voters are located on the plot. Are they more in the center and need to look for parties to the edges? Or whether the politics tactic is to be in the center to gather more electorate? 
+I wonder how the real voters are located on the plot. Are they more in the centre and need to look for parties to the edges? Or whether the politics tactic is to be in the middle not to scare balanced electorate? 
 
-To solve this I've asked my family members to fill the questionaire and I will map their results to the parties. You must know that we present all options, thus it might be interesting. Lets call them all FM (as Family Member) to keep some GDPR rules:
+To solve this I've asked my family members to fill the questionnaire and I will map their results on the political plot. You must know that my family presents very different opinions, thus it might be interesting. Lets call them all FM (as Family Member) to keep some GDPR rules:
 
-```{r}
-ANSWERS[6,] <- list("FM1", 1, -1, 1, -1, 0, 1, -1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, -1)
-ANSWERS[7,] <- list("FM2", 1, -1, 1, -1, 0, 1, -1, 0, -1, 1, 1, -1, -1, 0, 0, 0, -1, 1, -1, 0)
-ANSWERS[8,] <- list("FM3", -1, -1, 1, -1, 1, -1, 1, 0, 1, 0, -1, -1, 1, -1, -1, 1, 0, -1, 1, 0)
-ANSWERS[9,] <- list("FM4", 1, -1, 1, -1, -1, 1, 1, -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1, 0)
-ANSWERS[10,] <- list("FM5", 1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, -1, 0, -1, 1, -1, 1, 1)
-ANSWERS[11,] <- list("FM6", 1, -1, -1, -1, 1, 1, 1, 1, 1, -1, 1, -1, -1, -1, 1, 0, -1, 1, -1, -1)
-ANSWERS[12,] <- list("FM7", 1, 1,	1, 1, -1,	-1,	1, -1, -1, -1, 1, -1,	1, -1, 1, -1,	1, -1, 1, 1)
+```{r echo=FALSE}
+ANSWERS_PCA[6,] <- list(1, 1, -1, 0, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1)
+ANSWERS_PCA[7,] <- list(1, 1, -1, 0, 1, 0, -1, 1, 1, -1, -1, 0, 0, 0, -1, 1, -1)
+ANSWERS_PCA[8,] <- list(-1, 1, -1, 1, -1, 0, 1, 0, -1, -1, 1, -1, -1, 1, 0, -1, 1)
+ANSWERS_PCA[9,] <- list(1, 1, -1, -1, 1, -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1)
+ANSWERS_PCA[10,] <- list(1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, -1, 0, -1, 1, -1, 1)
+ANSWERS_PCA[11,] <- list(1, -1, -1, 1, 1, 1, 1, -1, 1, -1, -1, -1, 1, 0, -1, 1, -1)
+ANSWERS_PCA[12,] <- list(1, 1, 1, -1,	-1, -1, -1, -1, 1, -1,	1, -1, 1, -1,	1, -1, 1)
 
+for(i in 1:7) {
+  ANSWERS <- rbind(ANSWERS, c(paste0("FM", i), rep(NA, 23)))
+}
+
+ANSWERS$PC1 <- apply(ANSWERS_PCA, 1, function(x) {sum(x * model_pca$rotation[,1])})
+ANSWERS$PC2 <- apply(ANSWERS_PCA, 1, function(x) {sum(x * model_pca$rotation[,2])})
+ANSWERS$PC3 <- apply(ANSWERS_PCA, 1, function(x) {sum(x * model_pca$rotation[,3])})
+```
+``` {r echo=FALSE}
 plot_ly(ANSWERS, x = ~PC1, y = ~PC2, z = ~PC3, color = ~Party,
         colors = c(rep('#0077b5', 7), '#cfa61f', '#2b2929', '#ff231f', '#030e40', '#0bd00b')) %>% add_markers() %>% 
   layout(scene = list(xaxis = list(title = "conservatism"), yaxis = list(title = "socialism"), zaxis = list(title = "eurotraditionalism")))
 ```
 
+
+That is an interesting result! As you can see there can be distinguish three groups: more conservative members 2, 4, 6 that stick together with closest relation to Konfederacja and PSL, liberal group of two players 1 and 5 between Lewica and KO, and the third group together in medium eurotraditionalism, a bit socialistic and liberal consisting of family members 3 and 7. 
+
+Nevertheless the main point is that all family members are in the centre of the plot with the political parties on edges. Thus we can conclude that the political tactic is to present strong opinions and highlight the differences between parties. And we, the common citizens, might vote for very different parties, but we are closer to ourselves than it might be expected!
