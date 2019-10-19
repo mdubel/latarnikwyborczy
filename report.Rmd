@@ -118,47 +118,47 @@ ggplotly(ggbiplot(model_pca, labels = ANSWERS$Party, choices = c(1,3)))
 Let us analyse the components one by one, starting from the first one:
 The biggest positive influence have questions 8, 11, 14, 16. The negatives are 13 and 17, so: 
 
-+ Q8: cultural policy should strengthen national identity
-+ Q11: Christian values should be the basis of the state's social policy
-+ Q14: Coal should remain the primary source of energy in Poland
-+ Q16: The development and strengthening of Territorial Defence Forces should be continued
+- +Q8: cultural policy should strengthen national identity
+- +Q11: Christian values should be the basis of the state's social policy
+- +Q14: Coal should remain the primary source of energy in Poland
+- +Q16: The development and strengthening of Territorial Defence Forces should be continued
 
-- Q13: Same-sex people should be able to enter into a legal partnership
-- Q17: Poland should accept a larger number of economic immigrants from other countries
+- -Q13: Same-sex people should be able to enter into a legal partnership
+- -Q17: Poland should accept a larger number of economic immigrants from other countries
 
 Looks like an usual left-wing/right-wing classification. Strong result on first component shows the right-wing views, including promoting national and religious values, not caring about the environment, supporting strong military position based on trained citizens and refusing rights for homosexual couples and immigrants. We could call it altogether: *conservatism*
 
 # 2nd Component
 How about the second one? There is a small positive insight from questions 10, 15, 19, but here we should rather focus on the strong negatives: 1, 3, 5, and especially 6 and 18. Let us start from the strongest ones:
 
-- Q6: A patient in a public healthcare system facility should be able to pay for a higher standard of medical services
-- Q18: The European Union should have less influence on Polish internal policy
+- -Q6: A patient in a public healthcare system facility should be able to pay for a higher standard of medical services
+- -Q18: The European Union should have less influence on Polish internal policy
 
-- Q1: The scope of competence of local self-governments should be gradually expanded
-- Q3: The independence of the judiciary from parliament and government should be strengthened
-- Q5: The income tax-free amount should be increased significantly
+- -Q1: The scope of competence of local self-governments should be gradually expanded
+- -Q3: The independence of the judiciary from parliament and government should be strengthened
+- -Q5: The income tax-free amount should be increased significantly
 
-+ Q10: Information media should remain under the Polish financial control
-+ Q15: Poland should accelerate the construction of the nuclear power plant
-+ Q19: Poland should support the deepening of European integration in the field of foreign and defence policy
+- +Q10: Information media should remain under the Polish financial control
+- +Q15: Poland should accelerate the construction of the nuclear power plant
+- +Q19: Poland should support the deepening of European integration in the field of foreign and defence policy
 
 Here the grouping is not so simple, but we must try. Negative impact of questions 5 and 6 implicate the tendency for equalizing the wealth among citizens. Questions 1 and 3 shows that groups with high result in the  2nd component like keeping all the political power on the central, government level, without taking into account the judiciary. It seems like the common ground for those two aspects is taking back the decisions and responsibilities from the citizens to the state, both in legal and economic issues. Thus it looks like the *socialism*.
 
 # 3rd Component
 Usually the further we go in the PCA the harder it gets. Let see. Strong positive impact of question 19 and some for 8 and 11; negatives of 4, 9, 12, 13, 15, 17. So:
 
-+ Q19: Poland should support the deepening of European integration in the field of foreign and defence policy
-+ Q8: cultural policy should strengthen national identity
-+ Q11: Christian values should be the basis of the state's social policy
+- +Q19: Poland should support the deepening of European integration in the field of foreign and defence policy
+- +Q8: cultural policy should strengthen national identity
+- +Q11: Christian values should be the basis of the state's social policy
 
-- Q4: Retirement age should be increased
-- Q9: Public funds for learning should be focused on supporting the best universities in the country
-- Q12: The abortion law should be relaxed
-- Q13: Same-sex people should be able to enter into a legal partnership
-- Q14: Coal should remain the primary source of energy in Poland
-- Q15: Poland should accelerate the construction of the nuclear power plant
-- Q16: The development and strengthening of Territorial Defence Forces should be continued 
-- Q17: Poland should accept a larger number of economic immigrants from other countries
+- -Q4: Retirement age should be increased
+- -Q9: Public funds for learning should be focused on supporting the best universities in the country
+- -Q12: The abortion law should be relaxed
+- -Q13: Same-sex people should be able to enter into a legal partnership
+- -Q14: Coal should remain the primary source of energy in Poland
+- -Q15: Poland should accelerate the construction of the nuclear power plant
+- -Q16: The development and strengthening of Territorial Defence Forces should be continued 
+- -Q17: Poland should accept a larger number of economic immigrants from other countries
 
 The views here are quite complicated: they are pro-european and environmentally friendly, yet still traditional in the matters of national identity, Christian values, abortion law, same-sex couples and immigrants. I will go with *eurotraditionalism*. Complicated phrase; party will collect points here for both being conservative but open for European Union and green initiatives. Lacking in one of the views will strongly reduce the score here.
 
